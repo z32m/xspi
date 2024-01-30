@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.20.0)
 
-set(lib tish)
+set(lib xspi)
 PROJECT(${lib} C)
 
 set(${lib}_libtype PRIVATE PARENT_SCOPE)
