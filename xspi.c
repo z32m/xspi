@@ -1,11 +1,20 @@
 #include <xspi.h>
 #include <string.h>
+#include <xlog.h>
+
+#ifndef XSPI_DEBUG
+LOG_MODULE_REGISTER(xspi, LOG_LEVEL_INF);
+#else
+LOG_MODULE_REGISTER(xspi, LOG_LEVEL_DBG);
+#endif
 
 #define STATIC_BUF_SIZE 16
 
-int spi_write_read(struct spi_dt_spec *spi, void *send, size_t send_len, void *recv, size_t recv_len)
+int spi_write_read(const spi_t *spi, void *send, size_t send_len, void *recv, size_t recv_len)
 {
     size_t buf_size = send_len + recv_len;
+
+    LOG_DBG("transive send/recv: %u/%u", send_len, recv_len);
 
     uint8_t tx_st[STATIC_BUF_SIZE];
     uint8_t rx_st[STATIC_BUF_SIZE];
@@ -14,8 +23,10 @@ int spi_write_read(struct spi_dt_spec *spi, void *send, size_t send_len, void *r
     uint8_t *rx_buffer = buf_size > STATIC_BUF_SIZE ? k_malloc(buf_size) : rx_st;
 
     memset(tx_buffer, 0, buf_size);
-    memset(tx_buffer, 0, buf_size);
-    memcpy(tx_buffer, send, send_len);
+    memset(rx_buffer, 0, buf_size);
+
+    if (send && send_len)
+        memcpy(tx_buffer, send, send_len);
 
     const struct spi_buf tx_buf = {
         .buf = tx_buffer,
@@ -44,6 +55,6 @@ int spi_write_read(struct spi_dt_spec *spi, void *send, size_t send_len, void *r
         k_free(tx_buffer);
         k_free(rx_buffer);
     }
-    
+
     return err;
 }
